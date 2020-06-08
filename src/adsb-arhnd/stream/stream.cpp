@@ -7,6 +7,8 @@
 #include <QDataStream>
 #include <QDateTime>
 
+using namespace AdsbArhnd;
+
 Stream::Stream(QThread *parent,StreamSettings settings) :
     QThread(parent), m_settings(settings),m_status(NOT_AVAIL)
 {

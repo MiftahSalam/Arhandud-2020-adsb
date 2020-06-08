@@ -3,6 +3,8 @@
 #include <QStringList>
 #include <QDebug>
 
+using namespace AdsbArhnd;
+
 StreamDevice::StreamDevice(QObject *parent, StreamSettings settings) :
     QObject(parent),m_settings(settings)
 {

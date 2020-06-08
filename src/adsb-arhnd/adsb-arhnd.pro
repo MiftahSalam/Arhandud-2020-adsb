@@ -25,7 +25,7 @@ header_base.files = $$HEADERS_BASE
 header_base.path = /usr/include/adsb-arhnd
 INSTALLS += header_base
 
-header_stream.files = $$HEADERS_stream
+header_stream.files = $$HEADERS_STREAM
 header_stream.path = /usr/include/adsb-arhnd/stream
 INSTALLS += header_stream
 

@@ -6,6 +6,8 @@
 #include "stream/stream.h"
 #include "adsb.h"
 
+namespace AdsbArhnd {
+
 class ADSB_ARHND_EXPORT ADSBStreamIn : public Stream
 {
     Q_OBJECT
@@ -55,5 +57,6 @@ private:
     ADSBStreamIn *inStream;
     QString m_InError;
 };
+}
 
 #endif // ADSBSTREAM_H

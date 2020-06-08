@@ -5,6 +5,8 @@
 #include <math.h>
 #include <limits>
 
+using namespace AdsbArhnd;
+
 ADSBStream::ADSBStream(QObject *parent, StreamSettings inSettings) :
     QObject(parent), inStream(new ADSBStreamIn(0,inSettings))
 {

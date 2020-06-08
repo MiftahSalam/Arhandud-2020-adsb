@@ -38,6 +38,7 @@
 
 const quint64 ADSB_TARGET_EXPIRED = 65;
 
+namespace AdsbArhnd {
 class ADSB_ARHND_EXPORT ADSBTargetData
 {
 public:
@@ -97,5 +98,7 @@ private:
     bool IsExpired(int icao);
     void deleteTarget(int icao);
 };
+
+}
 
 #endif

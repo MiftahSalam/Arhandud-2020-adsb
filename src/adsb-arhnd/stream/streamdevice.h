@@ -8,6 +8,8 @@
 
 #include "adsb-arhnd_global.h"
 
+namespace AdsbArhnd {
+
 enum StreamMode
 {
     In = 0,
@@ -43,7 +45,7 @@ class ADSB_ARHND_EXPORT StreamDevice : public QObject
     Q_OBJECT
 public:
     explicit StreamDevice(QObject *parent = 0, StreamSettings settings = StreamSettings());
-    
+
     QByteArray readData();
     void sendData(QByteArray data);
     QString getCurrentError() { return m_error; }
@@ -54,9 +56,9 @@ public:
     }
 
 signals:
-    
+
 private slots:
-    
+
 private:
     QTcpSocket tcpsocket;
     QUdpSocket udpsocket;
@@ -67,5 +69,6 @@ private:
     QString setTcpClient();
     QString setUdp();
 };
+}
 
 #endif // STREAMDEVICE_H

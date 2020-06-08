@@ -4,6 +4,8 @@
 #include <QDateTime>
 #include <math.h>
 
+using namespace AdsbArhnd;
+
 ADSBDecoder::ADSBDecoder()
 {
     cur_targets_icao.clear();

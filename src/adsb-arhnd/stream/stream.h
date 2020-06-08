@@ -7,6 +7,8 @@
 
 #include "streamdevice.h"
 
+namespace AdsbArhnd {
+
 class ADSB_ARHND_EXPORT Stream : public QThread
 {
     Q_OBJECT
@@ -55,5 +57,6 @@ private:
     StreamDevice *device;
     bool exitReq;
 };
+}
 
 #endif // STREAM_H
