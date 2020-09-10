@@ -3,6 +3,6 @@ CONFIG += ordered
 
 SUBDIRS +=  src
 
-OTHER_FILES += Readme.md \
+OTHER_FILES += README.md \
                .travis.yml \
-               appveyor.ymls
+               appveyor.yml

@@ -28,12 +28,14 @@ void Stream::loop()
     {
         now = QDateTime::currentSecsSinceEpoch();
 
+//        qDebug()<<Q_FUNC_INFO;
         if(m_settings.mode == In)
         {
             m_data = device->readData();
 
             if(!m_data.isEmpty())
             {
+//                qDebug()<<Q_FUNC_INFO<<m_data;
                 data_tick = now;
                 decode();
                 emit signal_dataReceived(m_data); //untuk display raw data

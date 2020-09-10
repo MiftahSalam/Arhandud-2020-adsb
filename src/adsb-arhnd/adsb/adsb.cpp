@@ -156,11 +156,12 @@ QJsonArray ADSBParser::parseData(QByteArray json_data)
     QByteArray data = preParsedData(json_data);
     QJsonArray arry_json;
 
+//    qDebug()<<Q_FUNC_INFO<<data;
     if(!data.isEmpty())
     {
         QJsonParseError error;
         arry_json = QJsonDocument::fromJson(data,&error).array();
-//        qDebug()<<Q_FUNC_INFO<<error.errorString()<<arry_json.size();;
+        qDebug()<<Q_FUNC_INFO<<error.errorString()<<arry_json.size();;
 
     }
 //    qDebug()<<Q_FUNC_INFO<<arry_json.size()<<data;

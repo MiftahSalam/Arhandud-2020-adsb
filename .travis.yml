@@ -2,7 +2,7 @@ language: cpp
 
 sudo: required
 
-dist: trusty
+dist: centos7
 
 compiler:
 - gcc
@@ -11,24 +11,7 @@ os:
 - linux
 
 env:
-- QT_VERSION=qt53 QT_PPA=qt532
-- QT_VERSION=qt54 QT_PPA=qt542
-- QT_VERSION=qt55 QT_PPA=qt551
-- QT_VERSION=qt56 QT_PPA=qt562
-- QT_VERSION=qt57 QT_PPA=qt571
-- QT_VERSION=qt58 QT_PPA=qt58
-- QT_VERSION=qt59 QT_PPA=qt59
+- QT_VERSION=qt59
 
-before_install:
-  - sudo add-apt-repository --yes ppa:beineri/opt-$QT_PPA-trusty
-  - sudo apt-get update -qq
-
-install:
-  - sudo apt-get -y install $QT_VERSION-meta-minimal
-
-script:
-  - . /opt/$QT_VERSION/bin/$QT_VERSION-env.sh
-  - qmake
-  - make
-  - make check
-
+3rdparty:
+  - log4qt ver 1.4

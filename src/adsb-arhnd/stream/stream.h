@@ -30,7 +30,7 @@ public:
     SensorStatus getSensorStatus()
     {
         m_error = device->getCurrentError();
-//        qDebug()<<Q_FUNC_INFO<<m_error<<m_error.isEmpty()<<m_status;
+        qDebug()<<Q_FUNC_INFO<<m_error<<m_error.isEmpty()<<m_status;
         if(!m_error.isEmpty())
             m_status = NOT_AVAIL;
         return m_status;

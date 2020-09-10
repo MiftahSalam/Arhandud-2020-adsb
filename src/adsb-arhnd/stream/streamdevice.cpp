@@ -2,13 +2,61 @@
 
 #include <QStringList>
 #include <QDebug>
+#include <QHostInfo>
+#include <QEventLoop>
 
 using namespace AdsbArhnd;
+
+HttpHandler::HttpHandler() : last_request(QDateTime::currentDateTime())
+{
+
+}
+
+QByteArray HttpHandler::getAircraftData()
+{
+    QUrl url_aircraft = QUrl(main_url.toString()+"/aircraftlist.json");
+    return getData(url_aircraft);
+}
+
+QByteArray HttpHandler::getADSBInfo()
+{
+    QUrl url_info = QUrl(main_url.toString()+"/mapinfo.json");
+    return getData(url_info);
+}
+
+QByteArray HttpHandler::getData(QUrl url)
+{
+    QDateTime now = QDateTime::currentDateTime();
+
+    if(last_request.secsTo(now) < 2)
+        return "";
+
+    last_request = now;
+    req.setUrl(url);
+    req.setRawHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36");
+
+    reply = qnam.get(req);
+
+    QEventLoop loop;
+    connect(reply,SIGNAL(finished()),&loop,SLOT(quit()));
+    loop.exec();
+    m_error = reply->errorString().contains("Unknown") ? "" : reply->errorString();
+//    qDebug()<<Q_FUNC_INFO<<m_error;
+
+    return reply->readAll();
+
+}
+
+QString HttpHandler::setup(QUrl url)
+{
+    main_url = url;
+    return "";
+}
 
 StreamDevice::StreamDevice(QObject *parent, StreamSettings settings) :
     QObject(parent),m_settings(settings)
 {
-//    serialPort = NULL;
+    //    serialPort = NULL;
 
     init();
 }
@@ -36,12 +84,20 @@ QByteArray StreamDevice::readData()
     {
         if(udpsocket.state() == QAbstractSocket::BoundState)
         {
+            udpsocket.waitForReadyRead(10);
             while(udpsocket.hasPendingDatagrams())
             {
+//                qDebug()<<Q_FUNC_INFO<<udpsocket.bytesAvailable();
                 ret_val.resize(udpsocket.pendingDatagramSize());
                 udpsocket.readDatagram(ret_val.data(),ret_val.size());
             }
         }
+    }
+    else if(m_settings.type == HTTP)
+    {
+        ret_val = http.getAircraftData();
+        m_error = http.getError();
+//        qDebug()<<Q_FUNC_INFO<<ret_val;
     }
     /*
     else if(m_settings.type == Serial && (serialPort != NULL) )
@@ -61,15 +117,43 @@ QString StreamDevice::setUdp()
 
     if(config_list.size() != 2)
     {
+        qWarning()<<Q_FUNC_INFO<<"UDP invalid config. config not complete";
+        return "Invalid config";
+    }
+
+    QHostInfo info = QHostInfo::fromName(config_list.at(0));
+    if(info.error() == QHostInfo::HostNotFound)
+        return "Host not found";
+
+    if(config_list.at(1).toUInt() > 65535)
+        return "UDP port out of range";
+
+    qDebug()<<Q_FUNC_INFO<<"host info"<<info.errorString();
+
+    udpsocket.close();
+    if(!udpsocket.bind(QHostAddress(config_list.at(0)),config_list.at(1).toUInt()))
+        qWarning()<<Q_FUNC_INFO<<udpsocket.errorString()<<udpsocket.state();
+
+    return udpsocket.errorString().contains("Unknown") ? "" : udpsocket.errorString();
+}
+
+
+QString StreamDevice::setHttp()
+{
+    QStringList config_list = m_settings.config.split(";");
+
+    if(config_list.size() != 2)
+    {
         qDebug()<<Q_FUNC_INFO<<"invalid config. config not complete";
         return "Invalid config";
     }
 
-    udpsocket.close();
-    udpsocket.bind(QHostAddress(config_list.at(0)),config_list.at(1).toUInt());
+    QUrl url_info = QUrl("http://"+config_list.at(0)+":"+config_list.at(1)+"/mapinfo.js");
 
-    qDebug()<<Q_FUNC_INFO<<udpsocket.errorString()<<udpsocket.state();
-    return udpsocket.errorString().contains("Unknown") ? "" : udpsocket.errorString();
+    QString error = http.setup(url_info);
+    qDebug()<<Q_FUNC_INFO<<error;
+
+    return error.contains("Unknown") ? "" : error;
 }
 
 QString StreamDevice::setTcpClient()
@@ -89,6 +173,7 @@ QString StreamDevice::setTcpClient()
 //    qDebug()<<Q_FUNC_INFO<<tcpsocket.errorString();
     return tcpsocket.errorString().contains("Unknown") ? "" : tcpsocket.errorString();
 }
+
 /*
 QString StreamDevice::setSerial()
 {
@@ -172,6 +257,8 @@ void StreamDevice::init()
     */
     else if(m_settings.type == UDP)
         m_error = setUdp();
+    else if(m_settings.type == HTTP)
+        m_error = setHttp();
 }
 /*
 BaudRateType StreamDevice::setBaud(QString stringBaud)

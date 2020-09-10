@@ -125,7 +125,7 @@ void ADSBStreamIn::decode()
 {
     QList<int> targets = adsbDecoder.decode(adsbParser.parseData(m_data));
 
-//    qDebug()<<Q_FUNC_INFO<<m_data;
+//    qDebug()<<Q_FUNC_INFO<<targets;
 
     if(!targets.isEmpty())
     {
