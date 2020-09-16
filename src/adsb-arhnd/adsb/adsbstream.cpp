@@ -113,12 +113,18 @@ ADSBStreamIn::ADSBStreamIn(Stream *parent, StreamSettings settings) :
     settings.mode = In;
     m_settings = settings;
 }
+
 ADSBDecoder ADSBStreamIn::getADSB()
 {
     mutex.lock();
     ADSBDecoder dec_adsb = adsbDecoder;
     mutex.unlock();
     return dec_adsb;
+}
+
+void ADSBStreamIn::setLatLon(double lat, double lon)
+{
+    adsbDecoder.setLatLon(lat,lon);
 }
 
 void ADSBStreamIn::decode()

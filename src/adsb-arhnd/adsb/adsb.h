@@ -49,6 +49,8 @@ public:
     QString trimmed_call_sign;
     float lat;
     float lon;
+    float rng;
+    float brn;
     float alt;
     float speed;
     float course;
@@ -89,6 +91,7 @@ public:
     QHash<int,ADSBTargetData*> getTargets() { return targetListMap; }
     ADSBTargetData* getTarget(int icao) const { return targetListMap.value(icao); }
     void updateADSB();
+    void setLatLon(double lat,double lon);
     QList<int> decode(QJsonArray targets);
 
 private:
@@ -97,6 +100,7 @@ private:
 
     bool IsExpired(int icao);
     void deleteTarget(int icao);
+    double m_lat,m_lon;
 };
 
 }

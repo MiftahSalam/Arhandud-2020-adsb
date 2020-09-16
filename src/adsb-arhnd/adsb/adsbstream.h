@@ -15,6 +15,8 @@ public:
     explicit ADSBStreamIn(Stream *parent = 0, StreamSettings settings = StreamSettings());
 
     ADSBDecoder getADSB();
+    void setLatLon(double lat,double lon);
+
 signals:
     void signal_newTarget(int icao);
     void signal_removeTarget(int icao);
@@ -43,6 +45,7 @@ public:
     QString getCurrentInputError() { return this->m_InError; }
     SensorStatus getCurrentSensorStatus() { return this->inStream->getSensorStatus(); }
     void setInSettings(StreamSettings inSettings);
+    void setLatLon(double lat,double lon) { inStream->setLatLon(lat,lon); }
 
     ~ADSBStream();
 

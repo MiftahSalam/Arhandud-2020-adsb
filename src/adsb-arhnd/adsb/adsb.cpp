@@ -121,8 +121,26 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
                 cur_target->vertical_rate_valid = false;
 
             cur_target->time_stamp = QDateTime::currentDateTime().toTime_t();
+
+            if(cur_target->lat_valid && cur_target->lon_valid)
+            {
+                double dif_lat = lat*M_PI/180.;
+                double dif_lon = ((lon*M_PI/180.)-(m_lon*M_PI/180.))*cos(((m_lat+lat)/2.)*M_PI/180.);
+                double R = 6371.;
+
+                dif_lat =  dif_lat - (m_lat*M_PI/180.);
+
+                cur_target->rng = sqrt(dif_lat * dif_lat + dif_lon * dif_lon)*R;
+                qreal bearing = atan2(dif_lon,dif_lat)*180./M_PI;
+
+                while(bearing < 0.0)
+                {
+                    bearing += 360.0;
+                }
+                cur_target->brn = bearing;
+            }
             /*
-            qDebug()<<Q_FUNC_INFO<<"icao"<<icao;
+            qDebug()<<Q_FUNC_INFO<<"icao"<<icao<<m_lat<<m_lon<<cur_target->rng<<cur_target->brn;
             qDebug()<<Q_FUNC_INFO<<"cur_target->call_sign"<<cur_target->call_sign<<call_sign.size();
             qDebug()<<Q_FUNC_INFO<<"cur_target->lat"<<cur_target->lat;
             qDebug()<<Q_FUNC_INFO<<"cur_target->lon"<<cur_target->lon;
@@ -142,6 +160,13 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
     return cur_targets_icao;
 
 //    qDebug()<<Q_FUNC_INFO<<"targetListMap->size"<<targetListMap.size();
+}
+
+void ADSBDecoder::setLatLon(double lat,double lon)
+{
+//    qDebug()<<Q_FUNC_INFO<<"lat"<<lat<<"lon"<<lon;
+    m_lat = lat;
+    m_lon = lon;
 }
 
 ADSBParser::ADSBParser()
@@ -209,6 +234,8 @@ ADSBTargetData::ADSBTargetData()
     strncpy(call_sign,"@@@@@@@@@@",10);
     lat = 1000;
     lon = 1000;
+    rng = -1.;
+    brn = -1.;
     alt = 1000000;
     speed = 10000;
     course = 1000;
