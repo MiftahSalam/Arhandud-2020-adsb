@@ -35,14 +35,16 @@ void Stream::loop()
 
             if(!m_data.isEmpty())
             {
-//                qDebug()<<Q_FUNC_INFO<<m_data;
+//                qDebug()<<Q_FUNC_INFO<<"ada data"<<m_data;
                 data_tick = now;
                 decode();
                 emit signal_dataReceived(m_data); //untuk display raw data
             }
 
+//            qDebug()<<Q_FUNC_INFO<<m_data<<now<<data_tick;
             if((now-data_tick) > 10)
             {
+//                qDebug()<<Q_FUNC_INFO<<"no data";
                 m_status = NO_DATA;
                 update();
                 data_tick = now;
@@ -74,14 +76,15 @@ void Stream::sendData()
 
 void Stream::init()
 {
-    qDebug()<<Q_FUNC_INFO<<m_settings.config<<m_settings.mode<<m_settings.type<<isRunning();
+    qDebug()<<Q_FUNC_INFO<<"first"<<m_settings.config<<m_settings.mode<<m_settings.type<<isRunning();
 
     while(isRunning())
     {
-        mutex.tryLock();
+        mutex.tryLock(1000);
         exitReq = true;
         mutex.unlock();
     }
+    qDebug()<<Q_FUNC_INFO<<"end"<<m_settings.config<<m_settings.mode<<m_settings.type<<isRunning();
 
     m_data.clear();
     exitReq = false;

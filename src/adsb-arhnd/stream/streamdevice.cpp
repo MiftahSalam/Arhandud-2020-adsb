@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QHostInfo>
 #include <QEventLoop>
+#include <QTimer>
 
 using namespace AdsbArhnd;
 
@@ -31,6 +32,7 @@ QByteArray HttpHandler::getData(QUrl url)
     if(last_request.secsTo(now) < 2)
         return "";
 
+    qDebug()<<Q_FUNC_INFO<<"url"<<url;
     last_request = now;
     req.setUrl(url);
     req.setRawHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36");
@@ -39,9 +41,10 @@ QByteArray HttpHandler::getData(QUrl url)
 
     QEventLoop loop;
     connect(reply,SIGNAL(finished()),&loop,SLOT(quit()));
+    QTimer::singleShot(3000,&loop,SLOT(quit()));
     loop.exec();
     m_error = reply->errorString().contains("Unknown") ? "" : reply->errorString();
-//    qDebug()<<Q_FUNC_INFO<<m_error;
+    qDebug()<<Q_FUNC_INFO<<m_error;
 
     return reply->readAll();
 
@@ -97,7 +100,13 @@ QByteArray StreamDevice::readData()
     {
         ret_val = http.getAircraftData();
         m_error = http.getError();
-//        qDebug()<<Q_FUNC_INFO<<ret_val;
+        if(!m_error.isEmpty())
+        {
+            ret_val = http.getADSBInfo();
+            m_error = http.getError();
+        }
+
+//        qDebug()<<Q_FUNC_INFO<<ret_val<<m_error;
     }
     /*
     else if(m_settings.type == Serial && (serialPort != NULL) )
@@ -148,7 +157,7 @@ QString StreamDevice::setHttp()
         return "Invalid config";
     }
 
-    QUrl url_info = QUrl("http://"+config_list.at(0)+":"+config_list.at(1)+"/mapinfo.js");
+    QUrl url_info = QUrl("http://"+config_list.at(0)+":"+config_list.at(1));
 
     QString error = http.setup(url_info);
     qDebug()<<Q_FUNC_INFO<<error;

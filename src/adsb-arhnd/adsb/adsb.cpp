@@ -153,8 +153,11 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
             qDebug()<<Q_FUNC_INFO<<"cur_target->time_stamp"<<cur_target->time_stamp;
             */
 
-            targetListMap.insert(icao,cur_target);
-            cur_targets_icao.append(icao);
+            if((cur_target->rng < 55.) && (cur_target->lat_valid))
+            {
+                targetListMap.insert(icao,cur_target);
+                cur_targets_icao.append(icao);
+            }
         }
     }
     return cur_targets_icao;
@@ -180,13 +183,16 @@ QJsonArray ADSBParser::parseData(QByteArray json_data)
 {
     QByteArray data = preParsedData(json_data);
     QJsonArray arry_json;
+    m_error = "";
 
 //    qDebug()<<Q_FUNC_INFO<<data;
     if(!data.isEmpty())
     {
         QJsonParseError error;
         arry_json = QJsonDocument::fromJson(data,&error).array();
-        qDebug()<<Q_FUNC_INFO<<error.errorString()<<arry_json.size();;
+        if(error.error != QJsonParseError::NoError)
+            m_error = error.errorString();
+        qDebug()<<Q_FUNC_INFO<<m_error<<arry_json.size();;
 
     }
 //    qDebug()<<Q_FUNC_INFO<<arry_json.size()<<data;

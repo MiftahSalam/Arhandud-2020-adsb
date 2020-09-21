@@ -36,7 +36,7 @@
 
 #include "adsb-arhnd_global.h"
 
-const quint64 ADSB_TARGET_EXPIRED = 65;
+const quint64 ADSB_TARGET_EXPIRED = 25;
 
 namespace AdsbArhnd {
 class ADSB_ARHND_EXPORT ADSBTargetData
@@ -73,6 +73,7 @@ public:
     ADSBParser();
 
     QJsonArray parseData(QByteArray json_data);
+    QString getError() { return m_error; }
 
 private:
     QByteArray preParsedData(QByteArray data);
@@ -80,6 +81,7 @@ private:
     QByteArray appendString;
     bool start_append;
     bool stop_append;
+    QString m_error;
 
 };
 

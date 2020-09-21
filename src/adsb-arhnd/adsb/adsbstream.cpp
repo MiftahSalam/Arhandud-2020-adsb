@@ -131,7 +131,7 @@ void ADSBStreamIn::decode()
 {
     QList<int> targets = adsbDecoder.decode(adsbParser.parseData(m_data));
 
-//    qDebug()<<Q_FUNC_INFO<<targets;
+    qDebug()<<Q_FUNC_INFO<<targets;
 
     if(!targets.isEmpty())
     {
@@ -144,13 +144,19 @@ void ADSBStreamIn::decode()
         }
     }
     else
-        m_data_error_tick++;
+    {
+        if(adsbParser.getError().isEmpty())
+            m_status = NO_DATA;
+        else
+            m_data_error_tick++;
+    }
 
     if(m_data_error_tick > 200)
     {
         m_data_error_tick = 200;
         m_status = DATA_UNKNOWN;
     }
+    qDebug()<<Q_FUNC_INFO<<targets<<"m_status"<<m_status<<"m_data_error_tick"<<m_data_error_tick;
 
 }
 
