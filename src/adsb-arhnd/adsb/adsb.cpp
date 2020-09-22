@@ -153,7 +153,7 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
             qDebug()<<Q_FUNC_INFO<<"cur_target->time_stamp"<<cur_target->time_stamp;
             */
 
-            if((cur_target->rng < 55.) && (cur_target->lat_valid))
+            if((cur_target->rng < 60.) && (cur_target->lat_valid))
             {
                 targetListMap.insert(icao,cur_target);
                 cur_targets_icao.append(icao);
