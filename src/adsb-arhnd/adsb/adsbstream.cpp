@@ -88,6 +88,8 @@ void ADSBStream::trigger_updateTargetData(int icao)
 
     stream_out.writeRawData((const char*)&curTarget->country,10);  //10 byte
 
+    stream_out<<curTarget->selected;
+
     emit signal_updateTargetData(data_out);
 }
 

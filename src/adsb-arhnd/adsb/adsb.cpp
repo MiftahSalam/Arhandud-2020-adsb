@@ -12,6 +12,13 @@ ADSBDecoder::ADSBDecoder()
     targetListMap.clear();
 }
 
+void ADSBDecoder::setTargetNumber(int icao, int number)
+{
+    ADSBTargetData* cur_target = targetListMap.value(icao);
+    cur_target->number = number;
+    targetListMap.insert(icao,cur_target);
+}
+
 void ADSBDecoder::updateADSB()
 {
 //    qDebug()<<Q_FUNC_INFO<<"targetListMap->size"<<targetListMap.size();
@@ -237,6 +244,7 @@ QByteArray ADSBParser::preParsedData(QByteArray data)
 ADSBTargetData::ADSBTargetData()
 {
     icao = -1;
+    number = -1;
     strncpy(call_sign,"@@@@@@@@@@",10);
     lat = 1000;
     lon = 1000;

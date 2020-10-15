@@ -45,6 +45,7 @@ public:
     ADSBTargetData();
 
     int icao;
+    int number;
     char call_sign[11];
     QString trimmed_call_sign;
     float lat;
@@ -61,6 +62,7 @@ public:
     bool speed_valid;
     bool course_valid;
     bool vertical_rate_valid;
+    bool selected;
     quint8 ground;
     char country[11];
     QString trimmed_country;
@@ -92,6 +94,7 @@ public:
 
     QHash<int,ADSBTargetData*> getTargets() { return targetListMap; }
     ADSBTargetData* getTarget(int icao) const { return targetListMap.value(icao); }
+    void setTargetNumber(int icao, int number);
     void updateADSB();
     void setLatLon(double lat,double lon);
     QList<int> decode(QJsonArray targets);
