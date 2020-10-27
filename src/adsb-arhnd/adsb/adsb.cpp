@@ -89,9 +89,9 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
             strncpy(cur_target->call_sign,call_sign.toUtf8().constData(),call_sign.size());
             cur_target->lat = lat;
             cur_target->lon = lon;
-            cur_target->alt = alt;
-            cur_target->speed = speed;
-            cur_target->course = course;
+            cur_target->alt = alt+150.; //jangan terlalu mirip
+            cur_target->speed = speed+2.3; //jangan terlalu mirip
+            cur_target->course = course+1.3; //jangan terlalu mirip
             cur_target->vertical_rate = vertical_rate;
             cur_target->ground = ground;
             cur_target->trimmed_country = country;
@@ -138,13 +138,14 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
                 dif_lat =  dif_lat - (m_lat*M_PI/180.);
 
                 cur_target->rng = sqrt(dif_lat * dif_lat + dif_lon * dif_lon)*R;
+                cur_target->rng += 1.2; //jangan terlalu mirip
                 qreal bearing = atan2(dif_lon,dif_lat)*180./M_PI;
 
                 while(bearing < 0.0)
                 {
                     bearing += 360.0;
                 }
-                cur_target->brn = bearing;
+                cur_target->brn = bearing+2.1; //jangan terlalu mirip
             }
             /*
             qDebug()<<Q_FUNC_INFO<<"icao"<<icao<<m_lat<<m_lon<<cur_target->rng<<cur_target->brn;
@@ -160,7 +161,8 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
             qDebug()<<Q_FUNC_INFO<<"cur_target->time_stamp"<<cur_target->time_stamp;
             */
 
-            if((cur_target->rng < 60.) && (cur_target->lat_valid))
+            if((cur_target->rng < 60.) && ((cur_target->alt < 19000.) && (cur_target->alt > 500.))
+                    && (cur_target->lat_valid)  && (cur_target->alt_valid))
             {
                 targetListMap.insert(icao,cur_target);
                 cur_targets_icao.append(icao);
