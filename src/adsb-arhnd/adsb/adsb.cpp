@@ -161,7 +161,8 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
             qDebug()<<Q_FUNC_INFO<<"cur_target->time_stamp"<<cur_target->time_stamp;
             */
 
-            if((cur_target->rng < 60.) && ((cur_target->alt < 26000.) && (cur_target->alt > 500.))
+            //jarak max 100Km, ketinggian max 9 Km (~ 30000 ft), ketinggian min 500m (~ 1500 ft)
+            if((cur_target->rng < 100.) && ((cur_target->alt < 30000.) && (cur_target->alt > 1500.))
                     && (cur_target->lat_valid)  && (cur_target->alt_valid))
             {
                 targetListMap.insert(icao,cur_target);

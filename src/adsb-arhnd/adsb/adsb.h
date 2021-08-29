@@ -48,13 +48,13 @@ public:
     int number;
     char call_sign[11];
     QString trimmed_call_sign;
-    float lat;
-    float lon;
-    float rng;
-    float brn;
-    float alt;
-    float speed;
-    float course;
+    float lat; //deg
+    float lon; //deg
+    float rng; //km
+    float brn; //deg
+    float alt; //feet
+    float speed; //kts
+    float course; //deg
     float vertical_rate;
     bool lat_valid;
     bool lon_valid;
