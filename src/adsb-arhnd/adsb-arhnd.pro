@@ -25,10 +25,6 @@ header_base.files = $$HEADERS_BASE
 header_base.path = /usr/include/adsb-arhnd
 INSTALLS += header_base
 
-header_stream.files = $$HEADERS_STREAM
-header_stream.path = /usr/include/adsb-arhnd/stream
-INSTALLS += header_stream
-
 header_adsb.files = $$HEADERS_ADSB
 header_adsb.path = /usr/include/adsb-arhnd/adsb
 INSTALLS += header_adsb
@@ -38,3 +34,8 @@ unix:!macx: LIBS += -L/usr/lib/ -llog4qt
 
 INCLUDEPATH += /include/
 DEPENDPATH += /include/
+
+unix:!macx: LIBS += -L/usr/lib/ -lstream-arhnd
+
+INCLUDEPATH += /usr/include/stream-arhnd
+DEPENDPATH += /usr/include/stream-arhnd

@@ -3,10 +3,12 @@
 
 #include <QObject>
 
-#include "stream/stream.h"
+#include <stream-arhnd/stream/stream.h>
 #include "adsb.h"
 
 namespace AdsbArhnd {
+
+using namespace StreamArhnd;
 
 class ADSB_ARHND_EXPORT ADSBStreamIn : public Stream
 {
