@@ -1,4 +1,4 @@
-#include "adsb.h"
+﻿#include "adsb.h"
 
 #include <QDebug>
 #include <QDateTime>
@@ -8,7 +8,9 @@ using namespace AdsbArhnd;
 
 ADSBDecoder::ADSBDecoder()
 {
-    cur_targets_icao.clear();
+//    cur_targets_icao.clear();
+    cur_targets_icao_from_adsb.clear();
+//    cur_targets_icao_from_iff.clear();
     targetListMap.clear();
 }
 
@@ -17,6 +19,24 @@ void ADSBDecoder::setTargetNumber(int icao, int number)
     ADSBTargetData* cur_target = targetListMap.value(icao);
     cur_target->number = number;
     targetListMap.insert(icao,cur_target);
+}
+
+void ADSBDecoder::setTargetIdentity(const QString squawk, const quint8 identity)
+{
+    ADSBTargetData *target = nullptr;
+    foreach (ADSBTargetData* cur_target, targetListMap)
+    {
+        if(cur_target->squawk_code == squawk)
+        {
+            target = targetListMap.take(cur_target->icao);
+            break;
+        }
+    }
+    if(target)
+    {
+        target->identity = identity;
+        targetListMap.insert(target->icao,target);
+    }
 }
 
 void ADSBDecoder::updateADSB()
@@ -49,12 +69,74 @@ bool ADSBDecoder::IsExpired(int icao)
 void ADSBDecoder::deleteTarget(int icao)
 {
     targetListMap.remove(icao);
+    cur_targets_icao_from_adsb.remove(icao);
 //    qDebug()<<Q_FUNC_INFO<<icao;
+}
+
+QList<int> ADSBDecoder::setTargetFromIFF(ADSBTargetData track)
+{
+    QList<int> cur_targets_icao;
+    ADSBTargetData *cur_target;
+
+    if(targetListMap.contains(track.icao))
+        cur_target = targetListMap.take(track.icao);
+    else
+        cur_target = new ADSBTargetData();
+
+    if(!cur_targets_icao_from_adsb.contains(track.icao))
+    {
+        cur_target->icao = track.icao;
+        cur_target->lat = track.lat;
+        cur_target->lon = track.lon;
+        cur_target->rng = track.rng;
+        cur_target->brn = track.brn;
+        cur_target->alt = track.alt; //jangan terlalu mirip
+        cur_target->speed = track.speed+1.3; //jangan terlalu mirip
+        cur_target->course = track.course+1.3; //jangan terlalu mirip
+        cur_target->vertical_rate = track.vertical_rate;
+        cur_target->ground = track.ground;
+        cur_target->lat_valid = track.lat_valid;
+        cur_target->lon_valid = track.lon_valid;
+        cur_target->alt_valid = track.alt_valid;
+        cur_target->speed_valid = track.speed_valid;
+        cur_target->course_valid = track.course_valid;
+        cur_target->vertical_rate_valid = track.vertical_rate_valid;
+        cur_target->time_stamp = track.time_stamp;
+        cur_target->identity = track.identity;
+        cur_target->squawk_code = track.squawk_code;
+
+//        targetListMap.insert(track.icao,cur_target);
+//        cur_targets_icao.append(track.icao);
+//        cur_targets_icao_from_iff.insert(track.icao);
+//        if(!cur_targets_icao_from_iff.contains(track.icao)) cur_targets_icao_from_iff.append(track.icao);
+
+    }
+    else
+    {
+//        cur_target = targetListMap.take(track.icao);
+        cur_target->identity = track.identity;
+    }
+    targetListMap.insert(track.icao,cur_target);
+    cur_targets_icao.append(track.icao);
+
+    /*
+    qDebug()<<Q_FUNC_INFO<<"ptr"<<targetListMap.value(track.icao);
+    qDebug()<<Q_FUNC_INFO<<"icao"<<targetListMap.value(track.icao)->icao;
+    qDebug()<<Q_FUNC_INFO<<"lat"<<targetListMap.value(track.icao)->lat;
+    qDebug()<<Q_FUNC_INFO<<"lon"<<targetListMap.value(track.icao)->lon;
+    qDebug()<<Q_FUNC_INFO<<"rng"<<targetListMap.value(track.icao)->rng;
+    qDebug()<<Q_FUNC_INFO<<"brn"<<targetListMap.value(track.icao)->brn;
+    qDebug()<<Q_FUNC_INFO<<"speed"<<targetListMap.value(track.icao)->speed;
+    qDebug()<<Q_FUNC_INFO<<"course"<<targetListMap.value(track.icao)->course;
+    */
+
+    return cur_targets_icao;
 }
 
 QList<int> ADSBDecoder::decode(QJsonArray targets)
 {
-    cur_targets_icao.clear();
+//    cur_targets_icao.clear();
+    QList<int> cur_targets_icao;
 
 //    qDebug()<<Q_FUNC_INFO<<targets.size();
 
@@ -75,6 +157,7 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
                 cur_target = new ADSBTargetData();
 
             QString call_sign = target.value("fli").toString("");
+            QString squawk = target.value("squ").toString("");
             float lat = target.value("lat").toDouble(1000);
             float lon = target.value("lon").toDouble(1000);
             float alt = target.value("alt").toDouble(1000000);
@@ -85,6 +168,7 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
             QString country = target.value("cou").toString("");
 
             cur_target->icao = icao;
+            cur_target->squawk_code = squawk;
             cur_target->trimmed_call_sign = call_sign;
             strncpy(cur_target->call_sign,call_sign.toUtf8().constData(),call_sign.size());
             cur_target->lat = lat;
@@ -167,6 +251,8 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
             {
                 targetListMap.insert(icao,cur_target);
                 cur_targets_icao.append(icao);
+                cur_targets_icao_from_adsb.insert(icao);
+//                if(!cur_targets_icao_from_adsb.contains(icao)) cur_targets_icao_from_adsb.append(icao);
             }
         }
     }
@@ -249,6 +335,7 @@ ADSBTargetData::ADSBTargetData()
     icao = -1;
     number = -1;
     strncpy(call_sign,"@@@@@@@@@@",10);
+    squawk_code = "0000";
     lat = 1000;
     lon = 1000;
     rng = -1.;

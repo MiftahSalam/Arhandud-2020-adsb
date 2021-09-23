@@ -18,6 +18,8 @@ public:
 
     ADSBDecoder getADSB();
     void setLatLon(double lat,double lon);
+    void setTargetFromIFF(ADSBTargetData track);
+    void setTargetIdentityFromIFF(const QString squawk, const quint8 identity);
 
 signals:
     void signal_newTarget(int icao);
@@ -48,6 +50,9 @@ public:
     SensorStatus getCurrentSensorStatus() { return this->inStream->getSensorStatus(); }
     void setInSettings(StreamSettings inSettings);
     void setLatLon(double lat,double lon) { inStream->setLatLon(lat,lon); }
+    void setTargetFromIFF(ADSBTargetData track) { inStream->setTargetFromIFF(track); }
+    void setTargetIdentityFromIFF(const QString squawk, const quint8 identity)
+    { inStream->setTargetIdentityFromIFF(squawk,identity); }
 
     ~ADSBStream();
 

@@ -89,6 +89,8 @@ void ADSBStream::trigger_updateTargetData(int icao)
     stream_out.writeRawData((const char*)&curTarget->country,10);  //10 byte
 
     stream_out<<curTarget->selected;
+    stream_out<<curTarget->identity;
+//    stream_out<<curTarget->squawk_code;
 
     emit signal_updateTargetData(data_out);
 }
@@ -127,6 +129,41 @@ ADSBDecoder ADSBStreamIn::getADSB()
 void ADSBStreamIn::setLatLon(double lat, double lon)
 {
     adsbDecoder.setLatLon(lat,lon);
+}
+
+void ADSBStreamIn::setTargetIdentityFromIFF(const QString squawk, const quint8 identity)
+{
+    adsbDecoder.setTargetIdentity(squawk,identity);
+}
+void ADSBStreamIn::setTargetFromIFF(ADSBTargetData track)
+{
+    QList<int> targets = adsbDecoder.setTargetFromIFF(track);
+
+    if(!targets.isEmpty())
+    {
+        m_data_error_tick = 0;
+        m_status = AVAIL;
+        foreach (const int icao, targets)
+        {
+            emit signal_newTarget(icao);
+            msleep(50);
+        }
+    }
+    else
+    {
+        if(adsbParser.getError().isEmpty())
+            m_status = NO_DATA;
+        else
+            m_data_error_tick++;
+    }
+
+    if(m_data_error_tick > 200)
+    {
+        m_data_error_tick = 200;
+        m_status = DATA_UNKNOWN;
+    }
+    qDebug()<<Q_FUNC_INFO<<targets<<"m_status"<<m_status<<"m_data_error_tick"<<m_data_error_tick;
+
 }
 
 void ADSBStreamIn::decode()

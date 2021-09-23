@@ -10,6 +10,7 @@ contains(DEFINES, ADSB_ARHND_STATIC) {
 TEMPLATE = lib
 TARGET = adsb-arhnd
 QT -= gui
+QT += serialport
 
 DESTDIR = ../bin
 DEFINES += ADSB_ARHND_LIBRARY

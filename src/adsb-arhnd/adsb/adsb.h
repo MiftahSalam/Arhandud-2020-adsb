@@ -33,6 +33,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QHash>
+#include <QSet>
 
 #include "adsb-arhnd_global.h"
 
@@ -64,8 +65,10 @@ public:
     bool vertical_rate_valid;
     bool selected;
     quint8 ground;
+    quint8 identity;
     char country[11];
     QString trimmed_country;
+    QString squawk_code;
     uint time_stamp;
 };
 
@@ -95,12 +98,14 @@ public:
     QHash<int,ADSBTargetData*> getTargets() { return targetListMap; }
     ADSBTargetData* getTarget(int icao) const { return targetListMap.value(icao); }
     void setTargetNumber(int icao, int number);
+    void setTargetIdentity(const QString squawk, const quint8 identity);
     void updateADSB();
     void setLatLon(double lat,double lon);
+    QList<int> setTargetFromIFF(ADSBTargetData track);
     QList<int> decode(QJsonArray targets);
 
 private:
-    QList<int> cur_targets_icao;
+    QSet<int> cur_targets_icao_from_adsb;
     QHash<int,ADSBTargetData*> targetListMap;
 
     bool IsExpired(int icao);
