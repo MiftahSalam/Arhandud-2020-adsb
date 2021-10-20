@@ -158,8 +158,10 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
 
             QString call_sign = target.value("fli").toString("");
             QString squawk = target.value("squ").toString("");
+            QString cat = target.value("cat").toString("");
             float lat = target.value("lat").toDouble(1000);
             float lon = target.value("lon").toDouble(1000);
+//            float alt = 2000.; //tes
             float alt = target.value("alt").toDouble(1000000);
             float speed = target.value("spd").toDouble(10000);
             float course = target.value("trk").toDouble(1000);
@@ -169,10 +171,12 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
 
             cur_target->icao = icao;
             cur_target->squawk_code = squawk;
+            cur_target->cat = decideCat(cat);
             cur_target->trimmed_call_sign = call_sign;
             strncpy(cur_target->call_sign,call_sign.toUtf8().constData(),call_sign.size());
             cur_target->lat = lat;
             cur_target->lon = lon;
+//            cur_target->alt = 2000.; //test
             cur_target->alt = alt+150.; //jangan terlalu mirip
             cur_target->speed = speed+1.3; //jangan terlalu mirip
             cur_target->course = course+1.3; //jangan terlalu mirip
@@ -243,12 +247,27 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
             qDebug()<<Q_FUNC_INFO<<"cur_target->ground"<<cur_target->ground;
             qDebug()<<Q_FUNC_INFO<<"cur_target->country"<<cur_target->country<<country.size();
             qDebug()<<Q_FUNC_INFO<<"cur_target->time_stamp"<<cur_target->time_stamp;
+            qDebug()<<Q_FUNC_INFO<<"cur_target->lat_valid"<<cur_target->lat_valid;
+            qDebug()<<Q_FUNC_INFO<<"cur_target->alt_valid"<<cur_target->alt_valid;
+            qDebug()<<Q_FUNC_INFO<<"squawk_code"<<cur_target->squawk_code;
+            qDebug()<<Q_FUNC_INFO<<"cur_target->cat"<<cur_target->cat;
+            qDebug()<<Q_FUNC_INFO<<"cat"<<cat;
             */
 
+            bool pass = (cur_target->rng < 100.) && ((cur_target->alt < 26500.) && (cur_target->alt > 1500.))
+                    && (cur_target->lat_valid)  && (cur_target->alt_valid);
+
+//            if(icao == 11260195)
+//            {
+//                pass = true;
+//                cur_target->alt = 2200.;
+//                cur_target->alt_valid = true;
+//            }
             //jarak max 100Km, ketinggian max 9 Km (~ 30000 ft), ketinggian min 500m (~ 1500 ft)
-            if((cur_target->rng < 100.) && ((cur_target->alt < 30000.) && (cur_target->alt > 1500.))
-                    && (cur_target->lat_valid)  && (cur_target->alt_valid))
+            if(pass)
             {
+//                qDebug()<<Q_FUNC_INFO<<"filter pass"<<"squawk_code"<<cur_target->squawk_code;
+
                 targetListMap.insert(icao,cur_target);
                 cur_targets_icao.append(icao);
                 cur_targets_icao_from_adsb.insert(icao);
@@ -261,6 +280,17 @@ QList<int> ADSBDecoder::decode(QJsonArray targets)
 //    qDebug()<<Q_FUNC_INFO<<"targetListMap->size"<<targetListMap.size();
 }
 
+ADSBTargetData::AircraftCategory ADSBDecoder::decideCat(const QString cat_str)
+{
+    if(cat_str.contains("A0") || cat_str.contains("A1") || cat_str.contains("A2") || cat_str.contains("A3") || cat_str.contains("A4") || cat_str.contains("A5") || cat_str.contains("A6") || cat_str.contains("F2") || cat_str.contains("F8") || cat_str.contains("F9"))
+        return ADSBTargetData::AircraftCategory::FWD;
+    else if(cat_str.contains("A7") || cat_str.contains("F3"))
+        return ADSBTargetData::AircraftCategory::RWD;
+    else if(cat_str.contains("B1") || cat_str.contains("B4") || cat_str.contains("B6") || cat_str.contains("F1") || cat_str.contains("F6") || cat_str.contains("F7") || cat_str.contains("F13"))
+        return ADSBTargetData::AircraftCategory::UAV;
+    else
+        return ADSBTargetData::AircraftCategory::UNKNOWN;
+}
 void ADSBDecoder::setLatLon(double lat,double lon)
 {
 //    qDebug()<<Q_FUNC_INFO<<"lat"<<lat<<"lon"<<lon;
@@ -336,6 +366,7 @@ ADSBTargetData::ADSBTargetData()
     number = -1;
     strncpy(call_sign,"@@@@@@@@@@",10);
     squawk_code = "0000";
+    identity = 0;
     lat = 1000;
     lon = 1000;
     rng = -1.;

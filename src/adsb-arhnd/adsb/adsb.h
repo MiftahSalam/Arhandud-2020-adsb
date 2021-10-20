@@ -45,6 +45,14 @@ class ADSB_ARHND_EXPORT ADSBTargetData
 public:
     ADSBTargetData();
 
+    enum AircraftCategory
+    {
+        FWD,
+        RWD,
+        UAV,
+        UNKNOWN
+    };
+
     int icao;
     int number;
     char call_sign[11];
@@ -69,6 +77,7 @@ public:
     char country[11];
     QString trimmed_country;
     QString squawk_code;
+    AircraftCategory cat;
     uint time_stamp;
 };
 
@@ -107,10 +116,11 @@ public:
 private:
     QSet<int> cur_targets_icao_from_adsb;
     QHash<int,ADSBTargetData*> targetListMap;
+    double m_lat,m_lon;
 
+    ADSBTargetData::AircraftCategory decideCat(const QString cat_str);
     bool IsExpired(int icao);
     void deleteTarget(int icao);
-    double m_lat,m_lon;
 };
 
 }

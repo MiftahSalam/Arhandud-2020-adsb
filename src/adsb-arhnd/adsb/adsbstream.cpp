@@ -90,7 +90,8 @@ void ADSBStream::trigger_updateTargetData(int icao)
 
     stream_out<<curTarget->selected;
     stream_out<<curTarget->identity;
-//    stream_out<<curTarget->squawk_code;
+    stream_out<<curTarget->squawk_code;
+    stream_out<<(quint8)curTarget->cat;
 
     emit signal_updateTargetData(data_out);
 }
